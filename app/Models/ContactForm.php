@@ -2,19 +2,14 @@
 
 namespace App\Models;
 
+use App\Mail\ContactFormReceived;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
 
 class ContactForm extends Model
 {
     use HasFactory;
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'contact_form_id';
 
     /**
      * The attributes that are mass assignable.
@@ -23,12 +18,12 @@ class ContactForm extends Model
      */
 
     protected $fillable = [
-        'firstName',
-        'lastName',
+        'first_name',
+        'last_name',
         'email',
         'message',
-        'privacyPolicy',
-        'phoneNumber',
+        'privacy_policy',
+        'phone_number',
         'subscribe',
         'company',
     ];
@@ -44,11 +39,6 @@ class ContactForm extends Model
         'updated_at',
     ];
 
-    public static function create(array $data)
-    {
-
-    }
-
     /**
      * Get the attributes that should be cast.
      *
@@ -58,7 +48,7 @@ class ContactForm extends Model
     protected function casts(): array
     {
         return [
-            'privacyPolicy' => 'boolean',
+            'privacy_policy' => 'boolean',
             'subscribe' => 'boolean',
         ];
     }
@@ -72,44 +62,25 @@ class ContactForm extends Model
     public function rules(): array
     {
         return [
-            'firstName' => 'required|string|max:255',
-            'lastName' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'message' => 'required|string',
-            'privacyPolicy' => 'required|boolean',
-            'phoneNumber' => 'nullable|string|max:255',
+            'privacy_policy' => 'required|boolean',
             'subscribe' => 'nullable|boolean',
             'company' => 'nullable|string|max:255',
         ];
     }
-
     /**
-     * Get the validation error messages that apply to the request.
-     *
-     * @return array<string, string>
+     * Send email if subscribe is True
      */
 
-    public function messages(): array
+    public function sendEmailIfSubscribed(): void
     {
-        return [
-            'firstName.required' => 'First name is required',
-            'firstName.string' => 'First name must be a string',
-            'firstName.max' => 'First name must not be greater than 255 characters',
-            'lastName.required' => 'Last name is required',
-            'lastName.string' => 'Last name must be a string',
-            'lastName.max' => 'Last name must not be greater than 255 characters',
-            'email.required' => 'Email is required',
-            'email.email' => 'Email must be a valid email address',
-            'email.max' => 'Email must not be greater than 255 characters',
-            'message.required' => 'Message is required',
-            'message.string' => 'Message must be a string',
-            'privacyPolicy.required' => 'Privacy policy is required',
-            'privacyPolicy.boolean' => 'Privacy policy must be a boolean',
-            'phoneNumber.string' => 'Phone number must be a string',
-            'phoneNumber.max' => 'Phone number must not be greater than 15 characters',
-            'subscribe.boolean' => 'Subscribe must be a boolean',
-            'company.string' => 'Company must be a string',
-            'company.max' => 'Company must not be greater than 255 characters',
-        ];
+        if ($this->subscribe) {
+            Mail::to($this->email)->send(new ContactFormReceived($this));
+        }
     }
+
+
 }
