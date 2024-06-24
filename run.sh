@@ -4,7 +4,6 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 
-
 # Set application key if it is not set
 if [ -z "$APP_KEY" ]; then
     echo "APP_KEY is not set"
